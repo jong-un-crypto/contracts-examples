@@ -246,13 +246,12 @@ impl LinkDrop {
     }
 }
 
-#[cfg(not(target_arch = "wasm32"))]
-#[cfg(test)]
+#[cfg(all(test, not(target_arch = "wasm32")))]
 mod tests {
 
     use super::*;
 
-    use unc_sdk::test_utils::{VMContextBuilder};
+    use unc_sdk::test_utils::VMContextBuilder;
     use unc_sdk::testing_env;
 
     fn linkdrop() -> AccountId {
@@ -477,7 +476,7 @@ mod tests {
         contract.send(pk.clone());
         assert_eq!(
             contract.accounts.get(&pk.into()).unwrap().as_attounc(),
-            (deposit.saturating_add(deposit).saturating_add(1).saturating_sub(ACCESS_KEY_ALLOWANCE.saturating_mul(2)))
+            deposit.as_attounc() + deposit.as_attounc() + 1 - 2 * ACCESS_KEY_ALLOWANCE.as_attounc()
         );
     }
 
@@ -497,7 +496,7 @@ mod tests {
             full_access_keys: Some(vec![pk.clone()]),
             limited_access_keys: Some(vec![LimitedAccessKey {
                 public_key: pk.clone(),
-                allowance: U128(100),
+                allowance: UncToken::from_attounc(100),
                 receiver_id: linkdrop(),
                 method_names: "send".to_string(),
             }]),
