@@ -79,7 +79,7 @@ impl Account {
             .map(|s| s.used_bytes)
             .unwrap_or(0);
         let storage_balance_needed =
-            UncToken::from(self.used_bytes - shared_bytes_used) * env::storage_byte_cost();
+            (UncToken::from_attounc((self.used_bytes - shared_bytes_used) as u128)).saturating_mul(env::storage_byte_cost().as_attounc());
         assert!(
             storage_balance_needed <= self.storage_balance,
             "Not enough storage balance"
@@ -118,7 +118,7 @@ impl Contract {
         );
         self.internal_get_account(account_id)
             .map(|mut a| {
-                a.storage_balance += storage_deposit;
+                a.storage_balance =  a.storage_balance.saturating_add(storage_deposit);
                 a
             })
             .unwrap_or_else(|| {
@@ -140,8 +140,8 @@ impl Contract {
 
         let mut account = Account::new(self.create_node_id());
         if registration_only {
-            let refund = storage_deposit - min_balance;
-            if refund > 0 {
+            let refund = storage_deposit.saturating_sub(min_balance);
+            if refund > UncToken::from_attounc(0) {
                 Promise::new(env::predecessor_account_id()).transfer(refund);
             }
             account.storage_balance = min_balance;
@@ -338,7 +338,7 @@ impl StorageManagement for Contract {
 
     fn storage_balance_bounds(&self) -> StorageBalanceBounds {
         StorageBalanceBounds {
-            min: U128(MIN_STORAGE_BALANCE),
+            min: MIN_STORAGE_BALANCE,
             max: None,
         }
     }

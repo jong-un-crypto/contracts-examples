@@ -38,7 +38,7 @@ impl Contract {
     ) {
         self.assert_live();
         let attached_deposit = env::attached_deposit();
-        require!(attached_deposit > 0, "Requires at least 1 yocto");
+        require!(attached_deposit > UncToken::from_attounc(0), "Requires at least 1 atto");
         let permission_key = predecessor_id
             .map(|a| {
                 require!(

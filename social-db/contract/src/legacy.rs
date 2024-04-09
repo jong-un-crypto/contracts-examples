@@ -1,12 +1,11 @@
 use crate::*;
 use unc_sdk::borsh::{BorshDeserialize, BorshSerialize};
-use unc_sdk::serde::{Deserialize, Serialize};
+use unc_sdk::serde::Serialize;
 /// Legacy version of the account, before shared storage pools were introduced.
 #[derive(BorshSerialize, BorshDeserialize, Serialize)]
 #[borsh(crate = "unc_sdk::borsh")]
 #[serde(crate = "unc_sdk::serde")]
 pub struct AccountV0 {
-    #[serde(with = "u128_dec_format")]
     pub storage_balance: UncToken,
     pub used_bytes: StorageUsage,
     /// Tracks all currently active permissions given by this account.

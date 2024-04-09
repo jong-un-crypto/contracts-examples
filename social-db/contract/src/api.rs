@@ -158,20 +158,20 @@ impl Contract {
             account.storage_tracker.stop();
             self.internal_set_account(account);
 
-            if options.refund_unused_deposit.unwrap_or(false) && attached_balance > 0 {
+            if options.refund_unused_deposit.unwrap_or(false) && attached_balance > UncToken::from_attounc(0) {
                 // The key is the account id that received the deposit.
                 let account_id: AccountId = key.parse().expect("key is valid account id");
                 if let Some(balance) = self.internal_storage_balance_of(&account_id) {
                     // We shouldn't refund more than what was deposited in this call.
-                    let refund = std::cmp::min(balance.available.0, attached_balance);
+                    let refund = std::cmp::min(balance.available, attached_balance);
                     self.internal_storage_withdraw(&account_id, Some(refund.into()));
                 }
             }
 
             // First key receives all the deposit.
-            attached_balance = 0;
+            attached_balance = UncToken::from_attounc(0);
         }
-        if attached_balance > 0 {
+        if attached_balance > UncToken::from_attounc(0) {
             env::panic_str("The attached deposit could not be added to any account");
         }
     }

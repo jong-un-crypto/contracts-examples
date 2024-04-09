@@ -1,6 +1,6 @@
 use crate::*;
 use unc_sdk::borsh::{BorshDeserialize, BorshSerialize};
-use unc_sdk::serde::{Deserialize, Serialize};
+use unc_sdk::serde::Serialize;
 const MINIMUM_SHARED_STORAGE_BALANCE: UncToken = UncToken::from_unc(100);
 
 #[derive(BorshSerialize, BorshDeserialize)]
@@ -45,7 +45,7 @@ impl SharedStoragePool {
     }
 
     pub fn available_bytes(&self) -> StorageUsage {
-        let max_bytes = (self.storage_balance / env::storage_byte_cost()) as StorageUsage;
+        let max_bytes = (self.storage_balance.saturating_div(env::storage_byte_cost().as_attounc())).as_attounc() as StorageUsage;
         max_bytes - self.used_bytes
     }
 }
@@ -125,7 +125,7 @@ impl Contract {
         let mut shared_storage_pool = self
             .internal_get_shared_storage_pool(&owner_id)
             .unwrap_or_else(|| SharedStoragePool::new());
-        shared_storage_pool.storage_balance += attached_deposit;
+        shared_storage_pool.storage_balance = shared_storage_pool.storage_balance.saturating_add(attached_deposit);
         storage_tracker.start();
         self.internal_set_shared_storage_pool(&owner_id, shared_storage_pool);
         storage_tracker.stop();

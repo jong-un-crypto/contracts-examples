@@ -21,7 +21,6 @@ use unc_sdk::borsh::{BorshDeserialize, BorshSerialize};
 use unc_sdk::serde::{Deserialize, Serialize};
 
 use unc_sdk::collections::{LookupMap, UnorderedMap};
-use unc_sdk::json_types::U128;
 use unc_sdk::{
     assert_one_atto, env, unc_bindgen, require, AccountId, UncToken, BorshStorageKey,
     PanicOnDefault, Promise, StorageUsage,
