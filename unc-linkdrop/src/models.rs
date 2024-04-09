@@ -3,7 +3,7 @@ use unc_sdk::serde::{Serialize, Deserialize};
 use crate::*;
 
 /// Information about a specific public key. Should be returned in the `get_key_information` view method.
-/// Part of the linkdrop NEP
+/// Part of the airdrop NEP
 #[derive(Serialize)]
 #[serde(crate = "unc_sdk::serde")]
 pub struct KeyInfo {

@@ -10,11 +10,11 @@ use models::*;
 
 #[unc_bindgen]
 #[derive(PanicOnDefault, BorshDeserialize, BorshSerialize)]
-pub struct LinkDrop {
+pub struct AirDrop {
     pub accounts: LookupMap<PublicKey, UncToken>,
 }
 
-/// Access key allowance for linkdrop keys.
+/// Access key allowance for airdrop keys.
 const ACCESS_KEY_ALLOWANCE: UncToken = UncToken::from_attounc(1_000_000_000_000_000_000_000_000);
 
 /// Gas attached to the callback from account creation.
@@ -24,11 +24,11 @@ pub const ON_CREATE_ACCOUNT_CALLBACK_GAS: Gas = Gas::from_gas(13_000_000_000_000
 const ACCESS_KEY_METHOD_NAMES: &str = "claim,create_account_and_claim";
 
 #[ext_contract(ext_self)]
-pub trait ExtLinkDrop {
+pub trait ExtAirDrop {
     /// Callback after plain account creation.
     fn on_account_created(&mut self, predecessor_account_id: AccountId, amount: U128) -> bool;
 
-    /// Callback after creating account and claiming linkdrop.
+    /// Callback after creating account and claiming airdrop.
     fn on_account_created_and_claimed(&mut self, amount: U128) -> bool;
 }
 
@@ -45,7 +45,7 @@ fn is_promise_success() -> bool {
 }
 
 #[unc_bindgen]
-impl LinkDrop {
+impl AirDrop {
     /// Initializes the contract with an empty map for the accounts
     #[init]
     pub fn new() -> Self {
@@ -126,7 +126,7 @@ impl LinkDrop {
             )
     }
 
-    /// Create new account without linkdrop and deposit passed funds (used for creating sub accounts directly).
+    /// Create new account without airdrop and deposit passed funds (used for creating sub accounts directly).
     #[payable]
     pub fn create_account(
         &mut self,
@@ -152,7 +152,7 @@ impl LinkDrop {
             )
     }
 
-    /// Create new account without linkdrop and deposit passed funds (used for creating sub accounts directly).
+    /// Create new account without airdrop and deposit passed funds (used for creating sub accounts directly).
     #[payable]
     pub fn create_account_advanced(
         &mut self,
@@ -236,7 +236,7 @@ impl LinkDrop {
     }
 
     /// Returns information associated with a given key.
-    /// Part of the linkdrop NEP
+    /// Part of the airdrop NEP
     #[handle_result]
     pub fn get_key_information(&self, key: PublicKey) -> Result<KeyInfo, &'static str> {
         match self.accounts.get(&key) {
@@ -254,8 +254,8 @@ mod tests {
     use unc_sdk::test_utils::VMContextBuilder;
     use unc_sdk::testing_env;
 
-    fn linkdrop() -> AccountId {
-        "linkdrop".parse().unwrap()
+    fn airdrop() -> AccountId {
+        "airdrop".parse().unwrap()
     }
 
     fn bob() -> AccountId {
@@ -264,8 +264,8 @@ mod tests {
 
     #[test]
     fn test_create_account() {
-        // Create a new instance of the linkdrop contract
-        let mut contract = LinkDrop::new();
+        // Create a new instance of the airdrop contract
+        let mut contract = AirDrop::new();
         // Create the public key to be used in the test
         let pk: PublicKey = "qSq3LoufLvTCTNGC3LJePMDGrok8dHMQ5A1YD9psbiz"
             .parse()
@@ -276,7 +276,7 @@ mod tests {
         // Initialize the mocked blockchain
         testing_env!(
             VMContextBuilder::new()
-            .current_account_id(linkdrop())
+            .current_account_id(airdrop())
             .attached_deposit(deposit)
             .context.clone()
         );
@@ -288,8 +288,8 @@ mod tests {
     #[test]
     #[should_panic]
     fn test_create_invalid_account() {
-        // Create a new instance of the linkdrop contract
-        let mut contract = LinkDrop::new();
+        // Create a new instance of the airdrop contract
+        let mut contract = AirDrop::new();
         // Create the public key to be used in the test
         let pk: PublicKey = "qSq3LoufLvTCTNGC3LJePMDGrok8dHMQ5A1YD9psbiz"
             .parse()
@@ -300,7 +300,7 @@ mod tests {
         // Initialize the mocked blockchain
         testing_env!(
             VMContextBuilder::new()
-            .current_account_id(linkdrop())
+            .current_account_id(airdrop())
             .attached_deposit(deposit)
             .context.clone()
         );
@@ -312,8 +312,8 @@ mod tests {
     #[test]
     #[should_panic]
     fn test_get_missing_balance_panics() {
-        // Create a new instance of the linkdrop contract
-        let contract = LinkDrop::new();
+        // Create a new instance of the airdrop contract
+        let contract = AirDrop::new();
         // Create the public key to be used in the test
         let pk: PublicKey = "qSq3LoufLvTCTNGC3LJePMDGrok8dHMQ5A1YD9psbiz"
             .parse()
@@ -322,7 +322,7 @@ mod tests {
         // Initialize the mocked blockchain
         testing_env!(
             VMContextBuilder::new()
-            .current_account_id(linkdrop())
+            .current_account_id(airdrop())
             .context.clone()
         );
 
@@ -331,8 +331,8 @@ mod tests {
 
     #[test]
     fn test_get_missing_balance_success() {
-        // Create a new instance of the linkdrop contract
-        let mut contract = LinkDrop::new();
+        // Create a new instance of the airdrop contract
+        let mut contract = AirDrop::new();
         // Create the public key to be used in the test
         let pk: PublicKey = "qSq3LoufLvTCTNGC3LJePMDGrok8dHMQ5A1YD9psbiz"
             .parse()
@@ -343,12 +343,12 @@ mod tests {
         // Initialize the mocked blockchain
         testing_env!(
             VMContextBuilder::new()
-            .current_account_id(linkdrop())
+            .current_account_id(airdrop())
             .attached_deposit(deposit)
             .context.clone()
         );
 
-        // Create the linkdrop
+        // Create the airdrop
         contract.send(pk.clone());
 
         // try getting the balance of the key
@@ -362,8 +362,8 @@ mod tests {
     #[test]
     #[should_panic]
     fn test_claim_invalid_account() {
-        // Create a new instance of the linkdrop contract
-        let mut contract = LinkDrop::new();
+        // Create a new instance of the airdrop contract
+        let mut contract = AirDrop::new();
         // Create the public key to be used in the test
         let pk: PublicKey = "qSq3LoufLvTCTNGC3LJePMDGrok8dHMQ5A1YD9psbiz"
             .parse()
@@ -374,19 +374,19 @@ mod tests {
         // Initialize the mocked blockchain
         testing_env!(
             VMContextBuilder::new()
-            .current_account_id(linkdrop())
+            .current_account_id(airdrop())
             .attached_deposit(deposit)
             .context.clone()
         );
 
-        // Create the linkdrop
+        // Create the airdrop
         contract.send(pk.clone());
 
-        // Now, send new transaction to linkdrop contract and reinitialize the mocked blockchain with new params
+        // Now, send new transaction to airdrop contract and reinitialize the mocked blockchain with new params
         testing_env!(
             VMContextBuilder::new()
-            .current_account_id(linkdrop())
-            .predecessor_account_id(linkdrop())
+            .current_account_id(airdrop())
+            .predecessor_account_id(airdrop())
             .signer_account_pk(pk.into())
             .account_balance(deposit)
             .context.clone()
@@ -402,8 +402,8 @@ mod tests {
 
     #[test]
     fn test_drop_claim() {
-        // Create a new instance of the linkdrop contract
-        let mut contract = LinkDrop::new();
+        // Create a new instance of the airdrop contract
+        let mut contract = AirDrop::new();
         // Create the public key to be used in the test
         let pk: PublicKey = "qSq3LoufLvTCTNGC3LJePMDGrok8dHMQ5A1YD9psbiz"
             .parse()
@@ -414,19 +414,19 @@ mod tests {
         // Initialize the mocked blockchain
         testing_env!(
             VMContextBuilder::new()
-            .current_account_id(linkdrop())
+            .current_account_id(airdrop())
             .attached_deposit(deposit)
             .context.clone()
         );
 
-        // Create the linkdrop
+        // Create the airdrop
         contract.send(pk.clone());
 
-        // Now, send new transaction to linkdrop contract and reinitialize the mocked blockchain with new params
+        // Now, send new transaction to airdrop contract and reinitialize the mocked blockchain with new params
         testing_env!(
             VMContextBuilder::new()
-            .current_account_id(linkdrop())
-            .predecessor_account_id(linkdrop())
+            .current_account_id(airdrop())
+            .predecessor_account_id(airdrop())
             .signer_account_pk(pk.into())
             .account_balance(deposit)
             .context.clone()
@@ -442,8 +442,8 @@ mod tests {
 
     #[test]
     fn test_send_two_times() {
-        // Create a new instance of the linkdrop contract
-        let mut contract = LinkDrop::new();
+        // Create a new instance of the airdrop contract
+        let mut contract = AirDrop::new();
         // Create the public key to be used in the test
         let pk: PublicKey = "qSq3LoufLvTCTNGC3LJePMDGrok8dHMQ5A1YD9psbiz"
             .parse()
@@ -454,25 +454,25 @@ mod tests {
         // Initialize the mocked blockchain
         testing_env!(
             VMContextBuilder::new()
-            .current_account_id(linkdrop())
+            .current_account_id(airdrop())
             .attached_deposit(deposit)
             .context.clone()
         );
 
-        // Create the linkdrop
+        // Create the airdrop
         contract.send(pk.clone());
         assert_eq!(contract.get_key_balance(pk.clone()), (deposit.saturating_sub(ACCESS_KEY_ALLOWANCE)).into());
 
         // Re-initialize the mocked blockchain with new params
         testing_env!(
             VMContextBuilder::new()
-            .current_account_id(linkdrop())
+            .current_account_id(airdrop())
             .account_balance(deposit)
             .attached_deposit(deposit + 1)
             .context.clone()
         );
 
-        // Attempt to recreate the same linkdrop twice
+        // Attempt to recreate the same airdrop twice
         contract.send(pk.clone());
         assert_eq!(
             contract.accounts.get(&pk.into()).unwrap().as_attounc(),
@@ -482,8 +482,8 @@ mod tests {
 
     #[test]
     fn test_create_advanced_account() {
-        // Create a new instance of the linkdrop contract
-        let mut contract = LinkDrop::new();
+        // Create a new instance of the airdrop contract
+        let mut contract = AirDrop::new();
         // Create the public key to be used in the test
         let pk: PublicKey = "qSq3LoufLvTCTNGC3LJePMDGrok8dHMQ5A1YD9psbiz"
             .parse()
@@ -497,16 +497,16 @@ mod tests {
             limited_access_keys: Some(vec![LimitedAccessKey {
                 public_key: pk.clone(),
                 allowance: UncToken::from_attounc(100),
-                receiver_id: linkdrop(),
+                receiver_id: airdrop(),
                 method_names: "send".to_string(),
             }]),
-            contract_bytes: Some(include_bytes!("../target/wasm32-unknown-unknown/release/linkdrop.wasm").to_vec()),
+            contract_bytes: Some(include_bytes!("../target/wasm32-unknown-unknown/release/airdrop.wasm").to_vec()),
         };
 
         // Initialize the mocked blockchain
         testing_env!(
             VMContextBuilder::new()
-            .current_account_id(linkdrop())
+            .current_account_id(airdrop())
             .attached_deposit(deposit)
             .context.clone()
         );
@@ -518,15 +518,15 @@ mod tests {
     #[test]
     #[should_panic]
     fn test_create_advanced_account_no_options() {
-        // Create a new instance of the linkdrop contract
-        let mut contract = LinkDrop::new();
+        // Create a new instance of the airdrop contract
+        let mut contract = AirDrop::new();
         // Default the deposit to an extremely small amount
         let deposit = 1_000_000;
 
         // Initialize the mocked blockchain
         testing_env!(
             VMContextBuilder::new()
-            .current_account_id(linkdrop())
+            .current_account_id(airdrop())
             .attached_deposit(deposit)
             .context.clone()
         );
