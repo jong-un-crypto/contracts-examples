@@ -1,6 +1,6 @@
-# Hello NEAR Contract
+# Hello Utility Contract
 
-The smart contract exposes two methods to enable storing and retrieving a greeting in the NEAR network.
+The smart contract exposes two methods to enable storing and retrieving a greeting in the Utility network.
 
 ```rust
 const DEFAULT_MESSAGE: &str = "Hello";
@@ -38,12 +38,12 @@ impl Contract {
 # Quickstart
 
 1. Make sure you have installed [rust](https://rust.org/).
-2. Install the [`NEAR CLI`](https://github.com/near/near-cli#setup)
+2. Install the [`Utility CLI`](https://github.com/near/near-cli#setup)
 
 <br />
 
 ## 1. Build and Deploy the Contract
-You can automatically compile and deploy the contract in the NEAR testnet by running:
+You can automatically compile and deploy the contract in the Utility testnet by running:
 
 ```bash
 ./deploy.sh
@@ -62,7 +62,7 @@ cat ./neardev/dev-account
 
 `get_greeting` is a read-only method (aka `view` method).
 
-`View` methods can be called for **free** by anyone, even people **without a NEAR account**!
+`View` methods can be called for **free** by anyone, even people **without a Utility account**!
 
 ```bash
 # Use near-cli to get the greeting
@@ -74,17 +74,17 @@ near view <dev-account> get_greeting
 ## 3. Store a New Greeting
 `set_greeting` changes the contract's state, for which it is a `change` method.
 
-`Change` methods can only be invoked using a NEAR account, since the account needs to pay GAS for the transaction.
+`Change` methods can only be invoked using a Utility account, since the account needs to pay GAS for the transaction.
 
 ```bash
 # Use near-cli to set a new greeting
 near call <dev-account> set_greeting '{"greeting":"howdy"}' --accountId <dev-account>
 ```
 
-**Tip:** If you would like to call `set_greeting` using your own account, first login into NEAR using:
+**Tip:** If you would like to call `set_greeting` using your own account, first login into Utility using:
 
 ```bash
-# Use near-cli to login your NEAR account
+# Use near-cli to login your Utility account
 near login
 ```
 

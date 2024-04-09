@@ -1,11 +1,11 @@
 // Anatomy 解剖一个智能合约
 //任何支持编译目标 wasm32-unknown-unknown的东西， 都是和智能合约兼容的
 // 对编译合约二进制文件有一个大小限制，约为4.19 MB
-// Modules 为NEAR SDK，提供访问执行环境，允许调用其他合同、转移代币等等
-use near_sdk::borsh::{self, BorshDeserialize, BorshSerialize};
-use near_sdk::{env, log, near_bindgen, AccountId, NearToken, Gas, Promise};
-use near_sdk::collections::UnorderedMap;
-use near_sdk::serde_json::json;
+// Modules 为Utility SDK，提供访问执行环境，允许调用其他合同、转移代币等等
+use unc_sdk::borsh::{self, BorshDeserialize, BorshSerialize};
+use unc_sdk::{env, log, unc_bindgen, AccountId, UncToken, Gas, Promise};
+use unc_sdk::store::LookupMap;
+use unc_sdk::serde_json::json;
 //Native Types u8, u16, u32, u64, u128, i8, i16, i32, i64, i128, Vec<T>, HashMap<K,V> ...
 //values larger than 52 bytes (such as u64 and u128), for which string-like alternatives
 //overflow-checks=true Cargo.toml
@@ -13,8 +13,8 @@ const DEFAULT_MESSAGE: &str = "Hello";
 
 //  Collections contract's attributes (state), Always prefer SDK collections over native 
 //  collections 被设计为将数据分割成chunk, defer reading and writing to the store until needed
-// near_sdk::collections 将迁移到 near_sdk::store 并更新API, 在 near-sdk 上启用 unstable 功能使用
-// https://docs.rs/near-sdk/latest/near_sdk/collections/index.html
+// unc_sdk::collections 将迁移到 unc_sdk::store 并更新API, 在 near-sdk 上启用 unstable 功能使用
+// https://docs.rs/near-sdk/latest/unc_sdk/collections/index.html
 /*
 vector: Vector::new(b"vec-uid-1".to_vec()),
 map: LookupMap::new(b"map-uid-1".to_vec()),
@@ -23,25 +23,25 @@ tree: TreeMap::new(b"tree-uid-1".to_vec()),
 */
 
 // Bob 合约
-const HELLO_NEAR: &str = "hello-nearverse.testnet";
-const NO_DEPOSIT: NearToken = NearToken::from_near(0);
+const HELLO_UTILITY: &str = "hello-nearverse.testnet";
+const NO_DEPOSIT: UncToken = UncToken::from_unc(0);
 const CALL_GAS: Gas = Gas::from_tgas(50);
 
 
-const MIN_STORAGE: NearToken = NearToken::from_yoctonear(100_000_000_000_000_000_000_000u128); //0.1 N
+const MIN_STORAGE: UncToken = UncToken::from_attounc(100_000_000_000_000_000_000_000u128); //0.1 U
 //const HELLO_CODE: &[u8] = include_bytes!("./hello.wasm");
 
 // Internal Structures 包括非bindings的内部结构和 bindings的合约结构
-// NEAR Bindgen bindings装饰器  Define the contract structure 合约的结构，Borsh 序列化状态存储， json 序列化作为方法的输入输出
-// NEAR Bindgen decorator/macro 将代码转换为有效的NEAR合约
+// Utility Bindgen bindings装饰器  Define the contract structure 合约的结构，Borsh 序列化状态存储， json 序列化作为方法的输入输出
+// Utility Bindgen decorator/macro 将代码转换为有效的Utility合约
 // 每当调用函数时，状态将被加载和反序列化，保持加载的数据量尽可能小是很重要的
-#[near_bindgen]
+#[unc_bindgen]
 #[derive(BorshDeserialize, BorshSerialize)]
 pub struct Contract {
     //KEY-VALUE STORAGE 键值存储, SDK通过borsh进行了抽象，业务层面dapps don't care
     greeting: String,
     pub beneficiary: AccountId,
-    pub donations: UnorderedMap<AccountId, u128>,
+    pub donations: LookupMap<AccountId, u128>,
 }
 
 impl Default for Contract {
@@ -53,13 +53,13 @@ impl Default for Contract {
             beneficiary: "v1.faucet.nonofficial.testnet".parse().unwrap(),
             // structures (Vectors, Sets, Maps and Trees) unique prefix进行初始化, 用于在序列化状态中识别结构的键
             //Nesting of Objects RS支持对象嵌套
-            donations: UnorderedMap::new(b"d"),
+            donations: LookupMap::new(b"d"),
         }
     }
 }
 
 // Implement the contract structure
-#[near_bindgen]
+#[unc_bindgen]
 impl Contract {
     // Public Methods init/view/call 三类， view方法默认有200Tgas
     // 在状态已经初始化过了, 再调用这个init就会报错的， 状态只能搞一次
@@ -70,7 +70,7 @@ impl Contract {
         Self {
             greeting: "hala".to_string(),
             beneficiary,
-            donations: UnorderedMap::new(b"d"),
+            donations: LookupMap::new(b"d"),
         }
     }
     // Public: Returns the stored greeting, defaulting to 'Hello'
@@ -96,7 +96,7 @@ impl Contract {
         let args = json!({ "message": "howdy".to_string() })
                   .to_string().into_bytes().to_vec();
     
-        Promise::new(HELLO_NEAR.parse().unwrap())
+        Promise::new(HELLO_UTILITY.parse().unwrap())
         .function_call("set_greeting".to_string(), args, NO_DEPOSIT, CALL_GAS)
         .then(
           Promise::new(env::current_account_id())
@@ -106,12 +106,12 @@ impl Contract {
     
     // Private Methods 方法保持公开，但只能由合约账户调用, 如跨合约回调，设置Owner
     #[private]
-      pub fn callback(&self, #[callback_result] result: Result<(), near_sdk::PromiseError>){
+      pub fn callback(&self, #[callback_result] result: Result<(), unc_sdk::PromiseError>){
         // this method can only be called by the contract's account
         if result.is_err(){
             log!("Something went wrong")
             // <TODO:> 状态不会回滚, 手动回滚调用前进行了任何状态更改（即更改或存储数据）
-            // attached NEAR 到call则需要reset
+            // attached Utility 到call则需要reset
             // 所有调用都是异步的，独立的，确保在调用和回调之间不要让合约处于可利用空子状态
             // 如果外部调用失败，必须在回调中手动回滚状态更改
         }else{
@@ -134,7 +134,7 @@ impl Contract {
 
     //Input & Return Types 通过接口使用JSON序列化抽象
     // 优先选择输入和返回类型中的 native types， 用 strings 替换 u64 / u128
-    // near_sdk::json_types::{U64, I64, U128, I128} 表示, json的大整数最大也是52 bytes
+    // unc_sdk::json_types::{U64, I64, U128, I128} 表示, json的大整数最大也是52 bytes
 
 
     /*
@@ -145,7 +145,7 @@ impl Contract {
 
     // costs ~0.45 TGas, 在genesis配置
     // 接收者不存在会转账失败,  留下些余额支付未来的存储需求
-    pub fn transfer(&self, to: AccountId, amount: NearToken){
+    pub fn transfer(&self, to: AccountId, amount: UncToken){
         Promise::new(to).transfer(amount);
     }
 
@@ -156,7 +156,7 @@ impl Contract {
         .create_account() // 默认是锁定账户, 没有keypairs密钥对
         .transfer(MIN_STORAGE);
     }
-    pub fn create_hello(&self, prefix: String, public_key: near_sdk::PublicKey){
+    pub fn create_hello(&self, prefix: String, public_key: unc_sdk::PublicKey){
         let account_id = prefix + "." + &env::current_account_id().to_string();
         Promise::new(account_id.parse().unwrap())
         .create_account()

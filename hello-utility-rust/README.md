@@ -6,14 +6,14 @@
 [![Build Status](https://img.shields.io/endpoint.svg?url=https%3A%2F%2Factions-badge.atrox.dev%2Fnear-examples%2Fhello-near-rust%2Fbadge%3Fref%3Dmain&style=flat&label=Tests)](https://actions-badge.atrox.dev/near-examples/hello-near-rust/goto?ref=main)
 
 
-Hello NEAR! is a friendly decentralized App that stores a greeting message. It is one of the simplest smart contracts you can create in NEAR, and the perfect gateway to introduce yourself in the world of smart contracts.
+Hello Utility! is a friendly decentralized App that stores a greeting message. It is one of the simplest smart contracts you can create in Utility, and the perfect gateway to introduce yourself in the world of smart contracts.
 
 ![](https://docs.near.org/assets/images/hello-near-banner-af016d03e81a65653c9230b95a05fe4a.png)
 
 
 # What This Example Shows
 
-1. How to store and retrieve information in the NEAR network.
+1. How to store and retrieve information in the Utility network.
 2. How to integrate a smart contract in a web frontend.
 
 <br />
