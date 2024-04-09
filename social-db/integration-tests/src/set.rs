@@ -7,7 +7,7 @@ use std::collections::HashMap;
 use std::fs;
 use unc_workspaces::network::Sandbox;
 use unc_workspaces::{Account, Contract, Worker};
-use unc_workspaces::types::NearToken;
+use unc_workspaces::types::UncToken;
 
 static CONTRACT_WASM_FILEPATH: &str = "res/social_db_local.wasm";
 
@@ -39,7 +39,7 @@ async fn test_set_method() -> Result<()> {
 
     user.call(contract.id(), "set")
         .args_json(args)
-        .deposit(NearToken::from_yoctounc(100_000_000_000_000_000_000_000u128))
+        .deposit(UncToken::from_attounc(100_000_000_000_000_000_000_000u128))
         .transact()
         .await?
         .into_result()?;
@@ -83,7 +83,7 @@ async fn test_set_method_and_refund() -> Result<()> {
     });
 
     let prev_balance = user.view_account().await?.balance;
-    let deposit = NearToken::from_unc(1);
+    let deposit = UncToken::from_unc(1);
 
     user.call(contract.id(), "set")
         .args_json(args)
@@ -121,7 +121,7 @@ async fn test_set_method_and_refund_with_existing_deposit() -> Result<()> {
         },
     });
 
-    let deposit = NearToken::from_unc(1);
+    let deposit = UncToken::from_unc(1);
 
     let first_prev_balance = first_user.view_account().await?.balance;
     first_user
@@ -192,7 +192,7 @@ async fn init_contract_and_user() -> Result<(Worker<Sandbox>, Contract, Account)
     let account = worker.dev_create_account().await?;
     let user = account
         .create_subaccount("alice")
-        .initial_balance(NearToken::from_unc(30))
+        .initial_balance(UncToken::from_unc(30))
         .transact()
         .await?
         .into_result()?;

@@ -6083,9 +6083,9 @@ dependencies = [
 
 [[package]]
 name = "unc-contract-standards"
-version = "0.7.2"
+version = "0.7.3"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "6f0239c5b4bde11f2e2f6843b0987e3e8f64d03b9606262b6c60d0665098dc68"
+checksum = "b55ff0b5f3a46b5e62ca910e0263397dd8e39cffd68312c1d98937ae4ad692cf"
 dependencies = [
  "unc-sdk",
 ]
@@ -6325,9 +6325,9 @@ dependencies = [
 
 [[package]]
 name = "unc-sdk"
-version = "0.7.2"
+version = "0.7.3"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "33d9126b611d80c8b9f9f63d90b11ddced4b259879d0b11cdcb394191ae1c115"
+checksum = "d3b51ab4c0391b87b79474d75b432be96425d3de8a80596dc7036b9468702627"
 dependencies = [
  "base64 0.22.0",
  "borsh 1.3.0",
@@ -6345,9 +6345,9 @@ dependencies = [
 
 [[package]]
 name = "unc-sdk-macros"
-version = "0.7.2"
+version = "0.7.3"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "180843c2238e09caf9a4b312e2b636da675429bc58f7aeee981788eb94cef696"
+checksum = "ada80c6a9cce42735f6f130e5349fdfa9498f15b9c9347928c93a13f9d5a6c07"
 dependencies = [
  "Inflector",
  "darling",
@@ -6368,9 +6368,9 @@ checksum = "9b5f83a88e29e260dd11680bbc987c69eced0450da97d32254854c01569309bb"
 
 [[package]]
 name = "unc-sys"
-version = "0.1.0"
+version = "0.7.3"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "91664f4cb44f7d4f8fc9cd1d50aa50f04be8a3aa75a1e487f1b15fe9b9481c2c"
+checksum = "958a1f465594107248c9fa2082224a8ec32dfcde7620a1df426d6c597e0e8e3b"
 
 [[package]]
 name = "unc-token"
