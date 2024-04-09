@@ -2,8 +2,8 @@ use crate::*;
 
 pub(crate) mod unordered_map_expensive {
     use super::*;
-    use near_sdk::borsh::{BorshDeserialize, BorshSerialize};
-    use near_sdk::serde::Serializer;
+    use unc_sdk::borsh::{BorshDeserialize, BorshSerialize};
+    use unc_sdk::serde::Serializer;
 
     pub fn serialize<S, K, V>(map: &UnorderedMap<K, V>, serializer: S) -> Result<S::Ok, S::Error>
     where
@@ -16,8 +16,8 @@ pub(crate) mod unordered_map_expensive {
 }
 
 pub(crate) mod u128_dec_format {
-    use near_sdk::serde::de;
-    use near_sdk::serde::{Deserialize, Deserializer, Serializer};
+    use unc_sdk::serde::de;
+    use unc_sdk::serde::{Deserialize, Deserializer, Serializer};
 
     pub fn serialize<S>(num: &u128, serializer: S) -> Result<S::Ok, S::Error>
     where

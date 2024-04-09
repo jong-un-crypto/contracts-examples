@@ -1,7 +1,9 @@
 use crate::*;
-use near_sdk::require;
-use near_sdk::serde_json::map::Entry;
-use near_sdk::serde_json::{Map, Value};
+use unc_sdk::require;
+use unc_sdk::serde_json::map::Entry;
+use unc_sdk::serde_json::{Map, Value};
+use unc_sdk::serde::{Deserialize, Serialize};
+
 use std::collections::HashSet;
 
 pub const MAX_KEY_LENGTH: usize = 256;
@@ -12,7 +14,7 @@ pub const KEY_BLOCK_HEIGHT: &str = ":block";
 pub const KEY_NODE_ID: &str = ":node";
 
 #[derive(Serialize, Deserialize, Default)]
-#[serde(crate = "near_sdk::serde")]
+#[serde(crate = "unc_sdk::serde")]
 pub struct GetOptions {
     pub with_block_height: Option<bool>,
     pub with_node_id: Option<bool>,
@@ -20,7 +22,7 @@ pub struct GetOptions {
 }
 
 #[derive(Copy, Clone, Serialize, Deserialize)]
-#[serde(crate = "near_sdk::serde")]
+#[serde(crate = "unc_sdk::serde")]
 pub enum KeysReturnType {
     True,
     BlockHeight,
@@ -28,7 +30,7 @@ pub enum KeysReturnType {
 }
 
 #[derive(Serialize, Deserialize, Default)]
-#[serde(crate = "near_sdk::serde")]
+#[serde(crate = "unc_sdk::serde")]
 pub struct KeysOptions {
     /// The type of the returned values. By default returns true.
     pub return_type: Option<KeysReturnType>,
@@ -39,23 +41,23 @@ pub struct KeysOptions {
 }
 
 #[derive(Serialize, Deserialize, Default)]
-#[serde(crate = "near_sdk::serde")]
+#[serde(crate = "unc_sdk::serde")]
 pub struct SetOptions {
     pub refund_unused_deposit: Option<bool>,
 }
 
-#[near_bindgen]
+#[unc_bindgen]
 impl Contract {
     /// ```js
     ///
     /// get({keys: [
-    ///   "alex.near/profile/*",
-    ///   "alex.near/profile/**",
-    ///   "alex.near/profile/[name,url,image_url]",
-    ///   "alex.near/profile/url",
-    ///   "alex.near/profile/",
-    ///   "bob.near/profile/*",
-    ///   "alex.near/graph/follow/*",
+    ///   "alex.unc/profile/*",
+    ///   "alex.unc/profile/**",
+    ///   "alex.unc/profile/[name,url,image_url]",
+    ///   "alex.unc/profile/url",
+    ///   "alex.unc/profile/",
+    ///   "bob.unc/profile/*",
+    ///   "alex.unc/graph/follow/*",
     /// ]})
     /// ```
     pub fn get(self, keys: Vec<String>, options: Option<GetOptions>) -> Value {
@@ -82,13 +84,13 @@ impl Contract {
     /// Note, recursive match all pattern "**" is not allowed.
     ///
     /// keys({keys: [
-    ///   "alex.near/profile/*",
-    ///   "alex.near/profile/*",
-    ///   "alex.near/profile/[name,url,image_url]",
-    ///   "alex.near/profile/url",
-    ///   "alex.near/profile/",
-    ///   "bob.near/profile/*",
-    ///   "alex.near/graph/follow/*",
+    ///   "alex.unc/profile/*",
+    ///   "alex.unc/profile/*",
+    ///   "alex.unc/profile/[name,url,image_url]",
+    ///   "alex.unc/profile/url",
+    ///   "alex.unc/profile/",
+    ///   "bob.unc/profile/*",
+    ///   "alex.unc/graph/follow/*",
     /// ]})
     /// ```
     pub fn keys(self, keys: Vec<String>, options: Option<KeysOptions>) -> Value {
@@ -113,7 +115,7 @@ impl Contract {
 
     /// ```js
     /// user_set({
-    ///   "alex.near": {
+    ///   "alex.unc": {
     ///     "graph": "yoloyoloyoloyolo:yoloyoloyoloyoloyo:lo",
     ///   }
     /// })
@@ -122,11 +124,11 @@ impl Contract {
     /// $account_id/badge/$badge_id/owners/$receiver_id
     ///
     /// user_set({
-    ///   "alex.near": {
+    ///   "alex.unc": {
     ///     "graph": {
     ///       "follow": {
-    ///         "root.near": "",
-    ///         "bob.near": "",
+    ///         "root.unc": "",
+    ///         "bob.unc": "",
     ///       }
     ///     }
     ///   }

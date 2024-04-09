@@ -5,9 +5,9 @@ use anyhow::Result;
 use serde_json::json;
 use std::collections::HashMap;
 use std::fs;
-use near_workspaces::network::Sandbox;
-use near_workspaces::{Account, Contract, Worker};
-use near_workspaces::types::NearToken;
+use unc_workspaces::network::Sandbox;
+use unc_workspaces::{Account, Contract, Worker};
+use unc_workspaces::types::NearToken;
 
 static CONTRACT_WASM_FILEPATH: &str = "res/social_db_local.wasm";
 
@@ -39,7 +39,7 @@ async fn test_set_method() -> Result<()> {
 
     user.call(contract.id(), "set")
         .args_json(args)
-        .deposit(NearToken::from_yoctonear(100_000_000_000_000_000_000_000u128))
+        .deposit(NearToken::from_yoctounc(100_000_000_000_000_000_000_000u128))
         .transact()
         .await?
         .into_result()?;
@@ -83,7 +83,7 @@ async fn test_set_method_and_refund() -> Result<()> {
     });
 
     let prev_balance = user.view_account().await?.balance;
-    let deposit = NearToken::from_near(1);
+    let deposit = NearToken::from_unc(1);
 
     user.call(contract.id(), "set")
         .args_json(args)
@@ -121,7 +121,7 @@ async fn test_set_method_and_refund_with_existing_deposit() -> Result<()> {
         },
     });
 
-    let deposit = NearToken::from_near(1);
+    let deposit = NearToken::from_unc(1);
 
     let first_prev_balance = first_user.view_account().await?.balance;
     first_user
@@ -170,12 +170,12 @@ async fn init_contract_and_user() -> Result<(Worker<Sandbox>, Contract, Account)
 
     // Create a sandboxed environment.
     // NOTE: Each call will create a new sandboxed environment
-    let worker = near_workspaces::sandbox().await?;
+    let worker = unc_workspaces::sandbox().await?;
     // or for testnet:
-    //let worker = near_workspaces::testnet().await?;
+    //let worker = unc_workspaces::testnet().await?;
     let wasm = fs::read(wasm_filepath)?;
 
-    //let wasm = near_workspaces::compile_project(wasm_filepath.).await?;
+    //let wasm = unc_workspaces::compile_project(wasm_filepath.).await?;
 
     let contract = worker.dev_deploy(&wasm).await?;
     contract.call("new").transact().await?.into_result()?;
@@ -192,7 +192,7 @@ async fn init_contract_and_user() -> Result<(Worker<Sandbox>, Contract, Account)
     let account = worker.dev_create_account().await?;
     let user = account
         .create_subaccount("alice")
-        .initial_balance(NearToken::from_near(30))
+        .initial_balance(NearToken::from_unc(30))
         .transact()
         .await?
         .into_result()?;

@@ -1,6 +1,6 @@
 use crate::*;
 
-#[near_bindgen]
+#[unc_bindgen]
 impl Contract {
     // A method to migrate a state during the contract upgrade.
     #[private]

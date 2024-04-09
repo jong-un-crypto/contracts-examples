@@ -2,7 +2,7 @@
 .idea
 
 target
-neardev
+uncdev
 
 # OS X
 .DS_Store

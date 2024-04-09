@@ -17,16 +17,18 @@ use crate::storage_tracker::*;
 use crate::utils::*;
 use crate::legacy::*;
 
-use near_sdk::borsh::{self, BorshDeserialize, BorshSerialize};
-use near_sdk::collections::{LookupMap, UnorderedMap};
-use near_sdk::json_types::U128;
-use near_sdk::serde::{Deserialize, Serialize};
-use near_sdk::{
-    assert_one_yocto, env, near_bindgen, require, AccountId, Balance, BorshStorageKey,
+use unc_sdk::borsh::{BorshDeserialize, BorshSerialize};
+use unc_sdk::serde::{Deserialize, Serialize};
+
+use unc_sdk::collections::{LookupMap, UnorderedMap};
+use unc_sdk::json_types::U128;
+use unc_sdk::{
+    assert_one_atto, env, unc_bindgen, require, AccountId, UncToken, BorshStorageKey,
     PanicOnDefault, Promise, StorageUsage,
 };
 
 #[derive(BorshSerialize, BorshStorageKey)]
+#[borsh(crate = "unc_sdk::borsh")]
 #[allow(unused)]
 enum StorageKey {
     Account,
@@ -37,7 +39,8 @@ enum StorageKey {
 }
 
 #[derive(BorshDeserialize, BorshSerialize, Serialize, Deserialize, Copy, Clone)]
-#[serde(crate = "near_sdk::serde")]
+#[borsh(crate = "unc_sdk::borsh")]
+#[serde(crate = "unc_sdk::serde")]
 pub enum ContractStatus {
     Genesis,
     Live,
@@ -46,8 +49,9 @@ pub enum ContractStatus {
 
 pub type NodeId = u32;
 
-#[near_bindgen]
+#[unc_bindgen]
 #[derive(BorshDeserialize, BorshSerialize, PanicOnDefault)]
+#[borsh(crate = "unc_sdk::borsh")]
 pub struct Contract {
     pub accounts: LookupMap<NodeId, VAccount>,
     pub root_node: Node,
@@ -57,7 +61,7 @@ pub struct Contract {
     pub shared_storage_pools: LookupMap<AccountId, VSharedStoragePool>,
 }
 
-#[near_bindgen]
+#[unc_bindgen]
 impl Contract {
     #[init]
     pub fn new() -> Self {

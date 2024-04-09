@@ -1,8 +1,10 @@
 use crate::*;
-
-const MINIMUM_SHARED_STORAGE_BALANCE: Balance = 100 * 10u128.pow(24);
+use unc_sdk::borsh::{BorshDeserialize, BorshSerialize};
+use unc_sdk::serde::{Deserialize, Serialize};
+const MINIMUM_SHARED_STORAGE_BALANCE: UncToken = UncToken::from_unc(100);
 
 #[derive(BorshSerialize, BorshDeserialize)]
+#[borsh(crate = "unc_sdk::borsh")]
 pub enum VSharedStoragePool {
     Current(SharedStoragePool),
 }
@@ -22,10 +24,11 @@ impl From<SharedStoragePool> for VSharedStoragePool {
 }
 
 #[derive(BorshSerialize, BorshDeserialize, Serialize)]
-#[serde(crate = "near_sdk::serde")]
+#[borsh(crate = "unc_sdk::borsh")]
+#[serde(crate = "unc_sdk::serde")]
 pub struct SharedStoragePool {
-    #[serde(with = "u128_dec_format")]
-    pub storage_balance: Balance,
+    pub storage_balance: UncToken
+    ,
     pub used_bytes: StorageUsage,
     /// The sum of the maximum number of bytes of storage that are shared between all accounts.
     /// This number might be larger than the total number of bytes of storage that are available.
@@ -35,7 +38,7 @@ pub struct SharedStoragePool {
 impl SharedStoragePool {
     pub fn new() -> Self {
         Self {
-            storage_balance: 0,
+            storage_balance: UncToken::from_attounc(0),
             used_bytes: 0,
             shared_bytes: 0,
         }
@@ -48,7 +51,8 @@ impl SharedStoragePool {
 }
 
 #[derive(BorshSerialize, BorshDeserialize, Serialize, Clone)]
-#[serde(crate = "near_sdk::serde")]
+#[borsh(crate = "unc_sdk::borsh")]
+#[serde(crate = "unc_sdk::serde")]
 pub struct AccountSharedStorage {
     /// The maximum number of bytes of storage from the shared storage pool.
     pub max_bytes: StorageUsage,
@@ -69,7 +73,7 @@ impl AccountSharedStorage {
 }
 
 #[derive(Serialize)]
-#[serde(crate = "near_sdk::serde")]
+#[serde(crate = "unc_sdk::serde")]
 pub struct StorageView {
     pub used_bytes: StorageUsage,
     pub available_bytes: StorageUsage,
@@ -98,7 +102,7 @@ impl Contract {
     }
 }
 
-#[near_bindgen]
+#[unc_bindgen]
 impl Contract {
     pub fn get_shared_storage_pool(&self, owner_id: AccountId) -> Option<SharedStoragePool> {
         self.internal_get_shared_storage_pool(&owner_id)
@@ -268,7 +272,7 @@ impl Contract {
                     .as_ref()
                     .map(|s| s.used_bytes)
                     .unwrap_or(0);
-                let available_bytes = (account.storage_balance / env::STORAGE_PRICE_PER_BYTE)
+                let available_bytes = (account.storage_balance.as_attounc())
                     as u64
                     - (account.used_bytes - used_shared_bytes);
 

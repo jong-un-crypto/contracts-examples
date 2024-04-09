@@ -8,6 +8,6 @@ edition = "2021"
 crate-type = ["cdylib"]
 
 [dependencies]
-near-sdk = "4.1.1"
-near-contract-standards = "4.1.1"
-near-sys = "0.2.1"
+unc-sdk = "0.7.2"
+unc-contract-standards = "0.7.2"
+unc-sys = "0.1.0"

@@ -1,16 +1,20 @@
 use crate::*;
-use near_sdk::{require, PublicKey};
+use unc_sdk::borsh::{BorshDeserialize, BorshSerialize};
+use unc_sdk::serde::{Deserialize, Serialize};
+use unc_sdk::{require, PublicKey};
 use std::collections::HashSet;
 
 #[derive(BorshSerialize, BorshDeserialize, Serialize, Deserialize)]
-#[serde(crate = "near_sdk::serde")]
+#[borsh(crate = "unc_sdk::borsh")]
+#[serde(crate = "unc_sdk::serde")]
 pub enum PermissionKey {
     AccountId(AccountId),
     SignerPublicKey(PublicKey),
 }
 
 #[derive(BorshSerialize, BorshDeserialize, Serialize, Deserialize)]
-#[serde(crate = "near_sdk::serde")]
+#[borsh(crate = "unc_sdk::borsh")]
+#[serde(crate = "unc_sdk::serde")]
 pub enum Permission {
     Granted(HashSet<NodeId>),
 }
@@ -23,7 +27,7 @@ impl Permission {
     }
 }
 
-#[near_bindgen]
+#[unc_bindgen]
 impl Contract {
     #[payable]
     pub fn grant_write_permission(

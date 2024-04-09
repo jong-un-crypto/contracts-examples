@@ -1,42 +1,45 @@
 use crate::*;
-use near_contract_standards::storage_management::{
+use unc_contract_standards::storage_management::{
     StorageBalance, StorageBalanceBounds, StorageManagement,
 };
-use near_sdk::require;
+use unc_sdk::borsh::{BorshDeserialize, BorshSerialize};
+use unc_sdk::serde::{Deserialize, Serialize};
+
+use unc_sdk::require;
 use std::convert::TryFrom;
 
 pub const MIN_STORAGE_BYTES: StorageUsage = 2000;
-const MIN_STORAGE_BALANCE: Balance = MIN_STORAGE_BYTES as Balance * env::STORAGE_PRICE_PER_BYTE;
+const MIN_STORAGE_BALANCE: UncToken = UncToken::from_attounc(0);
 
 #[derive(BorshSerialize, BorshDeserialize, Serialize)]
-#[serde(crate = "near_sdk::serde")]
+#[borsh(crate = "unc_sdk::borsh")]
+#[serde(crate = "unc_sdk::serde")]
 pub struct Account {
-    #[serde(with = "u128_dec_format")]
-    pub storage_balance: Balance,
+    pub storage_balance: UncToken,
     pub used_bytes: StorageUsage,
     /// Tracks all currently active permissions given by this account.
     #[serde(with = "unordered_map_expensive")]
     pub permissions: UnorderedMap<PermissionKey, Permission>,
-    #[borsh_skip]
+    #[borsh(skip)]
     pub node_id: NodeId,
     #[serde(skip)]
-    #[borsh_skip]
+    #[borsh(skip)]
     pub storage_tracker: StorageTracker,
     /// Optional storage balance donated from one of shared pools.
     pub shared_storage: Option<AccountSharedStorage>,
 }
 
 #[derive(Serialize, Deserialize)]
-#[serde(crate = "near_sdk::serde")]
+#[serde(crate = "unc_sdk::serde")]
 pub struct PartialAccount {
-    #[serde(with = "u128_dec_format")]
-    pub storage_balance: Balance,
+    pub storage_balance: UncToken,
     pub used_bytes: StorageUsage,
     pub permissions: Vec<(PermissionKey, Permission)>,
     pub node_id: NodeId,
 }
 
 #[derive(BorshSerialize, BorshDeserialize)]
+#[borsh(crate = "unc_sdk::borsh")]
 pub enum VAccount {
     V0(AccountV0),
     Current(Account),
@@ -60,7 +63,7 @@ impl From<Account> for VAccount {
 impl Account {
     pub fn new(node_id: NodeId) -> Self {
         Self {
-            storage_balance: 0,
+            storage_balance: UncToken::from_attounc(0),
             used_bytes: 0,
             permissions: UnorderedMap::new(StorageKey::Permissions { node_id }),
             node_id,
@@ -76,7 +79,7 @@ impl Account {
             .map(|s| s.used_bytes)
             .unwrap_or(0);
         let storage_balance_needed =
-            Balance::from(self.used_bytes - shared_bytes_used) * env::storage_byte_cost();
+            UncToken::from(self.used_bytes - shared_bytes_used) * env::storage_byte_cost();
         assert!(
             storage_balance_needed <= self.storage_balance,
             "Not enough storage balance"
@@ -107,7 +110,7 @@ impl Contract {
     pub fn internal_unwrap_account_or_create(
         &mut self,
         account_id: &str,
-        storage_deposit: Balance,
+        storage_deposit: UncToken,
     ) -> Account {
         require!(
             env::is_valid_account_id(account_id.as_bytes()),
@@ -127,10 +130,10 @@ impl Contract {
     pub fn internal_create_account(
         &mut self,
         account_id: &str,
-        storage_deposit: Balance,
+        storage_deposit: UncToken,
         registration_only: bool,
     ) {
-        let min_balance = self.storage_balance_bounds().min.0;
+        let min_balance = UncToken::from_attounc(0);
         if storage_deposit < min_balance {
             env::panic_str("The attached deposit is less than the minimum storage balance");
         }
@@ -251,17 +254,17 @@ impl Contract {
         self.internal_get_account(account_id.as_str())
             .map(|account| StorageBalance {
                 total: account.storage_balance.into(),
-                available: U128(
+                available: UncToken::from_attounc((
                     account.storage_balance
-                        - Balance::from(
-                            account.used_bytes
+                        .saturating_sub(UncToken::from_attounc(
+                            account.used_bytes as u128
                                 - account
                                     .shared_storage
                                     .as_ref()
-                                    .map(|s| s.used_bytes)
-                                    .unwrap_or(0),
-                        ) * env::storage_byte_cost(),
-                ),
+                                    .map(|s| s.used_bytes as u128)
+                                    .unwrap_or(0u128),
+                        ).saturating_mul(env::storage_byte_cost().as_attounc()),
+                )).as_attounc()),
             })
     }
 
@@ -270,16 +273,16 @@ impl Contract {
     pub fn internal_storage_withdraw(
         &mut self,
         withdraw_from: &AccountId,
-        amount: Option<U128>,
+        amount: Option<UncToken>,
     ) -> StorageBalance {
         if let Some(storage_balance) = self.internal_storage_balance_of(&withdraw_from) {
-            let amount = amount.unwrap_or(storage_balance.available).0;
-            if amount > storage_balance.available.0 {
+            let amount = amount.unwrap_or(storage_balance.available);
+            if amount > storage_balance.available {
                 env::panic_str("The amount is greater than the available storage balance");
             }
-            if amount > 0 {
+            if amount > UncToken::from_attounc(0) {
                 let mut account = self.internal_unwrap_account(withdraw_from.as_str());
-                account.storage_balance -= amount;
+                account.storage_balance = account.storage_balance.saturating_sub(amount);
                 self.internal_set_account(account);
                 Promise::new(env::predecessor_account_id()).transfer(amount);
             }
@@ -290,7 +293,7 @@ impl Contract {
     }
 }
 
-#[near_bindgen]
+#[unc_bindgen]
 impl StorageManagement for Contract {
     #[payable]
     fn storage_deposit(
@@ -299,17 +302,17 @@ impl StorageManagement for Contract {
         registration_only: Option<bool>,
     ) -> StorageBalance {
         self.assert_live();
-        let attached_deposit: Balance = env::attached_deposit();
+        let attached_deposit: UncToken = env::attached_deposit();
         let account_id = account_id
             .map(|a| a.into())
             .unwrap_or_else(|| env::predecessor_account_id());
         let account = self.internal_get_account(account_id.as_str());
         let registration_only = registration_only.unwrap_or(false);
         if let Some(mut account) = account {
-            if registration_only && attached_deposit > 0 {
+            if registration_only && attached_deposit > UncToken::from_attounc(0) {
                 Promise::new(env::predecessor_account_id()).transfer(attached_deposit);
             } else {
-                account.storage_balance += attached_deposit;
+                account.storage_balance = account.storage_balance.saturating_add(attached_deposit);
                 self.internal_set_account(account);
             }
         } else {
@@ -319,9 +322,9 @@ impl StorageManagement for Contract {
     }
 
     #[payable]
-    fn storage_withdraw(&mut self, amount: Option<U128>) -> StorageBalance {
+    fn storage_withdraw(&mut self, amount: Option<UncToken>) -> StorageBalance {
         self.assert_live();
-        assert_one_yocto();
+        assert_one_atto();
         let account_id = env::predecessor_account_id();
         self.internal_storage_withdraw(&account_id, amount)
     }
@@ -345,7 +348,7 @@ impl StorageManagement for Contract {
     }
 }
 
-#[near_bindgen]
+#[unc_bindgen]
 impl Contract {
     /// Returns account information for accounts from a given index up to a given limit.
     pub fn get_accounts(

@@ -1,18 +1,22 @@
 use crate::*;
-use near_sdk::{require, BlockHeight};
+use unc_sdk::borsh::{BorshDeserialize, BorshSerialize};
+use unc_sdk::serde::{Deserialize, Serialize};
+use unc_sdk::{require, BlockHeight};
 
 pub const EMPTY_KEY: &str = "";
 pub const ERR_PERMISSION_DENIED: &str = "Permission Denied";
 
 #[derive(BorshSerialize, BorshDeserialize, Serialize, Deserialize)]
-#[serde(crate = "near_sdk::serde")]
+#[borsh(crate = "unc_sdk::borsh")]
+#[serde(crate = "unc_sdk::serde")]
 pub struct ValueAtHeight {
     pub value: String,
     pub block_height: BlockHeight,
 }
 
 #[derive(BorshSerialize, BorshDeserialize, Serialize, Deserialize)]
-#[serde(crate = "near_sdk::serde")]
+#[borsh(crate = "unc_sdk::borsh")]
+#[serde(crate = "unc_sdk::serde")]
 pub enum NodeValue {
     Value(ValueAtHeight),
     Node(NodeId),
@@ -43,15 +47,16 @@ impl NodeValue {
 }
 
 #[derive(BorshSerialize, BorshDeserialize)]
+#[borsh(crate = "unc_sdk::borsh")]
 pub struct Node {
-    #[borsh_skip]
+    #[borsh(skip)]
     pub node_id: NodeId,
     pub block_height: BlockHeight,
     pub children: UnorderedMap<String, NodeValue>,
 }
 
 #[derive(Serialize, Deserialize)]
-#[serde(crate = "near_sdk::serde")]
+#[serde(crate = "unc_sdk::serde")]
 pub struct PartialNode {
     pub node_id: NodeId,
     pub block_height: BlockHeight,
@@ -61,6 +66,7 @@ pub struct PartialNode {
 }
 
 #[derive(BorshSerialize, BorshDeserialize)]
+#[borsh(crate = "unc_sdk::borsh")]
 pub enum VNode {
     Current(Node),
 }
@@ -96,7 +102,7 @@ impl Node {
         }
     }
 
-    pub fn set(&mut self, key: &String, value: &near_sdk::serde_json::Value) {
+    pub fn set(&mut self, key: &String, value: &unc_sdk::serde_json::Value) {
         let value = if let Some(s) = value.as_str() {
             NodeValue::Value(ValueAtHeight {
                 value: s.to_string(),
@@ -135,7 +141,7 @@ impl Contract {
     }
 }
 
-#[near_bindgen]
+#[unc_bindgen]
 impl Contract {
     pub fn get_node_count(&self) -> u32 {
         self.node_count

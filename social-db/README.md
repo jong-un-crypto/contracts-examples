@@ -4,9 +4,9 @@
 
 ### Mainnet account ID
 
-Deployed at `social.near`
+Deployed at `social.unc`
 
-<https://nearblocks.io/address/social.near#contract>
+<https://uncblocks.io/address/social.unc#contract>
 
 ### About empty keys
 
@@ -14,7 +14,7 @@ If a leaf value was originally string, e.g. `name`
 
 ```json
 {
-  "alex.near": {
+  "alex.unc": {
     "profile": {
       "name": "Alex"
     }
@@ -27,7 +27,7 @@ will be moved to an empty key under this node. E.g. `name/foo = "bar"` is added.
 
 ```json
 {
-  "alex.near": {
+  "alex.unc": {
     "profile": {
       "name": {
         "": "Alex",
@@ -67,7 +67,7 @@ Examples:
 ```js
 set({
   data: {
-    "alex.near": {
+    "alex.unc": {
       "profile": {
         "name": "Alex",
         "image": {
@@ -80,11 +80,11 @@ set({
 
 set({
   data: {
-    "alex.near": {
+    "alex.unc": {
       "graph": {
         "follow": {
-          "root.near": "",
-          "bob.near": "",
+          "root.unc": "",
+          "bob.unc": "",
         }
       }
     }
@@ -99,9 +99,9 @@ It takes one or more path patterns as arguments, and returns the matching data.
 The path pattern is a string that can contain wildcards.
 For example:
 
-- `alice.near/profile/**` will match the entire profile data of account `alice.near`.
-- `alice.near/profile/*` will match all the fields of the profile, but not the nested objects.
-- `alice.near/profile/name` will match only the name field of the profile.
+- `alice.unc/profile/**` will match the entire profile data of account `alice.unc`.
+- `alice.unc/profile/*` will match all the fields of the profile, but not the nested objects.
+- `alice.unc/profile/name` will match only the name field of the profile.
 - `*/widget/*` will match all the widgets of all the accounts.
 
 ```rust
@@ -130,19 +130,19 @@ Returns the aggregated JSON object.
 Examples:
 
 ```js
-get({keys: ["alex.near/profile/name"]})
+get({keys: ["alex.unc/profile/name"]})
 
-get({keys: ["alex.near/profile/name", "root.near/profile/name"]})
+get({keys: ["alex.unc/profile/name", "root.unc/profile/name"]})
 
-get({keys: ["alex.near/profile/name", "alex.near/profile/description"]})
+get({keys: ["alex.unc/profile/name", "alex.unc/profile/description"]})
 
-get({keys: ["alex.near/profile/tags/*"]})
+get({keys: ["alex.unc/profile/tags/*"]})
 
-get({keys: ["alex.near/profile/**"]})
+get({keys: ["alex.unc/profile/**"]})
 
 get({keys: ["*/widget/*"]})
 
-get({keys: ["alex.near/profile/tags/*"], options: {return_deleted: true}})
+get({keys: ["alex.unc/profile/tags/*"], options: {return_deleted: true}})
 ```
 
 ### Reading keys
@@ -152,10 +152,10 @@ It's useful for querying the data without reading values.
 It also has an additional `options` field that can be used to specify the return type and whether to return deleted keys.
 For example:
 
-- `alice.near/profile/*` will return the list of all the fields of the profile, but not the nested objects.
+- `alice.unc/profile/*` will return the list of all the fields of the profile, but not the nested objects.
 - `*/profile/image/nft` will return the list of all the accounts that have an NFT image in their profile.
-- `alice.near/widget/*` with `return_deleted` option will return the list of all the widget names of the account, including the deleted ones.
-- `alice.near/widget/*` with `return_type` equal to `BlockHeight` will return the list of all the widget names of the account and the value will be the block height when the widget was last updated.
+- `alice.unc/widget/*` with `return_deleted` option will return the list of all the widget names of the account, including the deleted ones.
+- `alice.unc/widget/*` with `return_type` equal to `BlockHeight` will return the list of all the widget names of the account and the value will be the block height when the widget was last updated.
 - Note `**` is not supported by the `keys` method.
 
 ```rust
@@ -190,18 +190,18 @@ Returns the aggregated JSON object.
 Examples:
 
 ```js
-keys({keys: ["alex.near/profile/*"]})
+keys({keys: ["alex.unc/profile/*"]})
 
 keys({keys: ["*/profile/image/nft"]})
 
-keys({keys: ["alex.near/widget/*"], options: {return_deleted: true}})
+keys({keys: ["alex.unc/widget/*"], options: {return_deleted: true}})
 
-keys({keys: ["alex.near/widget/*"], options: {return_type: "BlockHeight", values_only: true}})
+keys({keys: ["alex.unc/widget/*"], options: {return_type: "BlockHeight", values_only: true}})
 ```
 
 ### Permissions
 
-See <https://explorer.testnet.near.org/transactions/3c7h9da1z5Px4JumNDsRaJtCDQaZHG46dsc2SnAj5LHx\>
+See <https://explorer.testnet.unc.org/transactions/3c7h9da1z5Px4JumNDsRaJtCDQaZHG46dsc2SnAj5LHx\>
 
 ```rust
 #[payable]
@@ -230,7 +230,7 @@ pub fn is_write_permission_granted(
 export CONTRACT_ID=v1.social08.testnet
 export ACCOUNT_ID=eugenethedream
 # Full contract data
-near view $CONTRACT_ID get '{"keys":["**"]}'
+unc view $CONTRACT_ID get '{"keys":["**"]}'
 # Full account's data
-near view $CONTRACT_ID get '{"keys":["'$ACCOUNT_ID'/**"]}'
+unc view $CONTRACT_ID get '{"keys":["'$ACCOUNT_ID'/**"]}'
 ```
