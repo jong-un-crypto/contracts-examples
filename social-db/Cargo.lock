@@ -6311,9 +6311,9 @@ dependencies = [
 
 [[package]]
 name = "unc-sandbox-utils"
-version = "0.7.0"
+version = "0.8.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "ad34d246d9dda6f86e2028aabf36296970e87d21704a02a44aeb16e7c217fc41"
+checksum = "b130f457ca789f66986ce29819ebd822e000d31834c03103859f7b246db054f6"
 dependencies = [
  "anyhow",
  "binary-install",
@@ -6570,9 +6570,9 @@ dependencies = [
 
 [[package]]
 name = "unc-workspaces"
-version = "0.7.3"
+version = "0.8.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "1da75c7a085c52a01f2926fe9b4eb88b9cc5d4c722cab3e19cb8c8f0e1c57c09"
+checksum = "211b34daf4b4c4d0b6a261cfd26a6b6fd30bf854777d6ecc9f3abed0548056cb"
 dependencies = [
  "async-trait",
  "base64 0.22.0",

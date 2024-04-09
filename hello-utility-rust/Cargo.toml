@@ -8,7 +8,7 @@ edition = "2021"
 crate-type = ["cdylib"]
 
 [dependencies]
-unc-sdk = { version = "0.7.2"}
+unc-sdk = { version = "0.7.3"}
 uint = { version = "0.9.3", default-features = false }
 
 [dev-dependencies]
