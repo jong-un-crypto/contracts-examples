@@ -7,7 +7,7 @@ use crate::*;
 #[derive(Serialize)]
 #[serde(crate = "near_sdk::serde")]
 pub struct KeyInfo {
-    /// yoctoNEAR$ amount that will be sent to the claiming account (either new or existing)
+    /// yoctoUTILITY$ amount that will be sent to the claiming account (either new or existing)
     /// when the key is successfully used.
     pub balance: U128,
 }
@@ -19,7 +19,7 @@ pub struct KeyInfo {
 pub struct LimitedAccessKey {
     /// The public key of the limited access key.
     pub public_key: PublicKey,
-    /// The amount of yoctoNEAR$ that can be spent on Gas by this key.
+    /// The amount of yoctoUTILITY$ that can be spent on Gas by this key.
     pub allowance: U128,
     /// Which contract should this key be allowed to call.
     pub receiver_id: AccountId,

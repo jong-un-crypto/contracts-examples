@@ -1,53 +1,91 @@
-# Hello Near 👋 
-[![](https://img.shields.io/badge/⋈%20Examples-Basics-green)](https://docs.near.org/tutorials/welcome)
-[![](https://img.shields.io/badge/Gitpod-Ready-orange)](https://gitpod.io/#/https://github.com/near-examples/hello-near-rust)
-[![](https://img.shields.io/badge/Contract-rust-red)](https://docs.near.org/develop/contracts/anatomy)
-[![](https://img.shields.io/badge/Frontend-JS-yellow)](https://docs.near.org/develop/integrate/frontend)
-[![Build Status](https://img.shields.io/endpoint.svg?url=https%3A%2F%2Factions-badge.atrox.dev%2Fnear-examples%2Fhello-near-rust%2Fbadge%3Fref%3Dmain&style=flat&label=Tests)](https://actions-badge.atrox.dev/near-examples/hello-near-rust/goto?ref=main)
+# Hello Utility Contract
 
+The smart contract exposes two methods to enable storing and retrieving a greeting in the Utility network.
 
-Hello Utility! is a friendly decentralized App that stores a greeting message. It is one of the simplest smart contracts you can create in Utility, and the perfect gateway to introduce yourself in the world of smart contracts.
+```rust
+const DEFAULT_MESSAGE: &str = "Hello";
 
-![](https://docs.near.org/assets/images/hello-near-banner-af016d03e81a65653c9230b95a05fe4a.png)
+#[near_bindgen]
+#[derive(BorshDeserialize, BorshSerialize)]
+pub struct Contract {
+    greeting: String,
+}
 
+impl Default for Contract {
+    fn default() -> Self {
+        Self{greeting: DEFAULT_MESSAGE.to_string()}
+    }
+}
 
-# What This Example Shows
+#[near_bindgen]
+impl Contract {
+    // Public: Returns the stored greeting, defaulting to 'Hello'
+    pub fn get_greeting(&self) -> String {
+        return self.greeting.clone();
+    }
 
-1. How to store and retrieve information in the Utility network.
-2. How to integrate a smart contract in a web frontend.
+    // Public: Takes a greeting, such as 'howdy', and records it
+    pub fn set_greeting(&mut self, greeting: String) {
+        // Record a log permanently to the blockchain!
+        log!("Saving greeting {}", greeting);
+        self.greeting = greeting;
+    }
+}
+```
 
 <br />
 
 # Quickstart
 
-Clone this repository locally or [**open it in gitpod**](https://gitpod.io/#/https://github.com/near-examples/hello-near-rust). Then follow these steps:
+1. Make sure you have installed [rust](https://rust.org/).
+2. Install the [`Utility CLI`](https://github.com/near/near-cli#setup)
 
-### 1. Install Dependencies
-```bash
-npm install
-```
+<br />
 
-### 2. Test the Contract
-Deploy your contract in a sandbox and simulate interactions from users.
+## 1. Build and Deploy the Contract
+You can automatically compile and deploy the contract in the Utility testnet by running:
 
 ```bash
-npm test
+./deploy.sh
 ```
 
-### 3. Deploy the Contract
-Build the contract and deploy it in a testnet account
+Once finished, check the `neardev/dev-account` file to find the address in which the contract was deployed:
+
 ```bash
-npm run deploy
+cat ./neardev/dev-account
+# e.g. dev-1659899566943-21539992274727
 ```
 
-### 4. Start the Frontend
-Start the web application to interact with your smart contract 
+<br />
+
+## 2. Retrieve the Greeting
+
+`get_greeting` is a read-only method (aka `view` method).
+
+`View` methods can be called for **free** by anyone, even people **without a Utility account**!
+
 ```bash
-npm start
+# Use near-cli to get the greeting
+near view <dev-account> get_greeting
 ```
 
----
+<br />
 
-# Learn More
-1. Learn more about the contract through its [README](./contract/README.md).
-2. Check [**our documentation**](https://docs.near.org/develop/welcome).
+## 3. Store a New Greeting
+`set_greeting` changes the contract's state, for which it is a `change` method.
+
+`Change` methods can only be invoked using a Utility account, since the account needs to pay GAS for the transaction.
+
+```bash
+# Use near-cli to set a new greeting
+near call <dev-account> set_greeting '{"greeting":"howdy"}' --accountId <dev-account>
+```
+
+**Tip:** If you would like to call `set_greeting` using your own account, first login into Utility using:
+
+```bash
+# Use near-cli to login your Utility account
+near login
+```
+
+and then use the logged account to sign the transaction: `--accountId <your-account>`.
